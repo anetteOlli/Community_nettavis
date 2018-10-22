@@ -1,0 +1,117 @@
+var mysql = require("mysql");
+
+const ArtikkelDao = require("./ArtikkelDao.js");
+const runsqlfile = require("./runsqlfile.js");
+var config = require("./testConfig.js");
+
+var pool = mysql.createPool(config);
+
+let artikkelDao = new ArtikkelDao(pool);
+
+beforeAll(done => {
+  runsqlfile("dao/create_tables.sql", pool, () => {
+    runsqlfile("dao/create_testdata.sql", pool, done);
+  });
+});
+
+afterAll(() => {
+  pool.end();
+});
+
+test("get one article from db", done => {
+  function callback(status, data) {
+    console.log(
+      "test get one, callback: status= " +
+        status +
+        ", data=" +
+        JSON.stringify(data)
+    );
+    expect(data.length).toBe(1);
+    expect(data[0].tittel).toBe("hest er best");
+    console.log("done " + data[0].tittel);
+    done();
+  }
+
+  artikkelDao.getOne(1, callback);
+});
+
+test("add article to db", done => {
+  function callback(status, data) {
+    console.log(
+      "test createOne, callback: status=" +
+        status +
+        ", data=" +
+        JSON.stringify(data)
+    );
+    expect(data.affectedRows).toBe(1);
+    done();
+  }
+  artikkelDao.createOne(
+    {
+      tittel: "mumitrollet",
+      kategori: "java",
+      innhold: "kjsgljgksfkjljbkj",
+      bildeLink: "wwww.mumitrollet.com",
+      bildeTekst: "mumitrollet i båt",
+      isViktig: 1
+    },
+    callback
+  );
+});
+
+test("get all articles from db", done => {
+  function callback(status, data) {
+    console.log(
+      "test get all, callback: status=" +
+        status +
+        ", data.length=" +
+        data.length
+    );
+    expect(data.length).toBeGreaterThanOrEqual(2);
+    done();
+  }
+  artikkelDao.getAll(callback);
+});
+
+test("delete one article", done => {
+  function callback(status, data) {
+    console.log(
+      "Test deleteOne callback: status=" +
+        status +
+        ", data.lenght: " +
+        data.length +
+        ", data=" +
+        JSON.stringify(data)
+    );
+    expect(data.affectedRows).toBe(1);
+    done();
+  }
+
+  artikkelDao.deleteOne(1, callback);
+});
+
+test("update one article", done => {
+  function callback(status, data) {
+    console.log(
+      "Test updateOne, callback: status=" +
+        status +
+        ", data=" +
+        JSON.stringify(data)
+    );
+    expect(data[0].tittel).toBe("gaute");
+    done();
+  }
+  artikkelDao.putOne(
+    {
+      id: 2,
+      tittel: "gaute",
+      kategori: "javascript",
+      innhold: "jdakgøjgkaølkfgjø",
+      bildeLink: "veadfadfien",
+      isViktig: 0
+    },
+    (status, data) => {
+      artikkelDao.getOne(2, callback);
+    }
+  );
+});

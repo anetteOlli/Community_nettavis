@@ -1,61 +1,93 @@
 var express = require("express");
 var mysql = require("mysql");
 var bodyParser = require("body-parser");
+const Joi = require("joi"); //er en klasse, derfor sto "J" i joi
 var app = express();
+const ArtikkelDao = require("./dao/ArtikkelDao.js");
+var config = require("./pool.js");
+//const pool = require("./connection.js"); //byttes ut med config fil?
 
 app.use(bodyParser.json()); // for å tolke JSON i body
 
-let tableMockTest = [{tittel : "hest er best"}, {body : "masseTekst"}, {bunnTekst: "endaMerTekst"}];
-let tabletMockTest2 =["tittel2", "massteTekst2", "endaMerTekst2"];
-let kategori = ["film", "sport", "natur"];
-let kategori2 = ["donald", "mikke", "langbein"];
-let test1 = {tittel : "doffen"};
-let test2 = {titel: "agurk"};
-let samlet = [test1, test2];
+console.log(config);
+
+var pool = mysql.createPool(config);
+
+let artikkelDao = new ArtikkelDao(pool);
+
+const artikkel_skjema = {
+  tittel: Joi.string()
+    .min(3)
+    .required(),
+  kategori: Joi.string()
+    .min(3)
+    .required(),
+  innhold: Joi.string()
+    .min(10)
+    .required(),
+  isViktig: Joi.number()
+    .min(0)
+    .max(1)
+    .required(),
+  bildeLink: Joi.string().min(10),
+  bildeTekst: Joi.string().min(15),
+  id: Joi.number()
+};
 
 app.use(express.static("public"));
 
-app.get("/api/artikler", (req, res) =>{
+app.get("/api/artikler", (req, res) => {
   /*
-  Henter ut alle artikler sortert etter dato
+  Henter ut alle artikler sortert etter dato, og rating?!
   */
-  res.json(samlet);
+  artikkelDao.getAll((status, data) => {
+    res.status(status);
+    res.json(data);
+  });
 });
 
-app.get("/api/artikler/:id", (req, res) =>{
+app.get("/api/artikler/:id/", (req, res) => {
   /*
   Henter ut artikkelen med matchende artikkel nr
   Returnerer resource not found error hvis artikkel ikke finnes
   */
-  if(req.params.id == "tableMockTest"){
-    res.json(tableMockTest);
-  }else{
-    res.json(tabletMockTest2);
-  }
-  res.send();
+  artikkelDao.getOne(req.params.id, (status, data) => {
+    res.status(status);
+    res.json(data);
+  });
 });
-app.get("/api/artikler/:kategori", (req, res) =>{
+
+app.get("/api/artikler/:kategori", (req, res) => {
   /*
   Henter ut alle artikler med denne kategorien, sortert på dato
   Returnerer resource not found error hvis artikkel ikke finnes
   */
-  if(req.params.kategori == "test"){
-    res.json(kategori);
-  }else{
-    res.json(test1);
-  }
-  res.send();
+  artikkelDao.getAllByCategory(req.params.kategori, (status, data) => {
+    res.status(status);
+    res.json(data);
+  });
 });
 
-app.post("/api/artikler", (req, res) =>{
+app.post("/api/artikler", (req, res) => {
   /*
   Henter JSON objekt og lagrer inn i mysql
   Viser siden med artikkelen som svar på requesten.
   (res.status(400) hvis brukeren mangler diverse felt (bruk joi))
   */
+  const result = Joi.validate(req.body, artikkel_skjema); //sjekker at req.body inneholder
+  //de tingene vi forlanger at de skal inneholde
+  console.log(req.body.tittel); //henter ut verdien til json objekt med navn "brukernavn"
+  var query1 = req.body.tittel;
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+  }
+  artikkelDao.createOne(req.body, (status, data) => {
+    res.status(status);
+    res.json(data);
+  });
 });
 
-app.put("/api/artikler/:id", (req, res) =>{
+app.put("/api/artikler/:id", (req, res) => {
   /*
   Denne skal endre artikkelen
   404 feil: finner ikke artikkelen vi skal endre
@@ -63,13 +95,29 @@ app.put("/api/artikler/:id", (req, res) =>{
 
   Returnerer den oppdaterte artikkelen.
   */
+
+  const result = Joi.validate(req.body, artikkel_skjema);
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+  }
+
+  artikkelDao.putOne(req.body, (status, data) => {
+    res.status(status);
+    res.json(data);
+  });
 });
-app.delete("api/artikler/:id"(req, res) => {
+
+app.delete("/api/artikler/:id", (req, res) => {
+  console.log("fikk request på delete");
   /*
   404 feil: artikkelen vi ønsker å slette finnes ikke
   Hvis ok -> sletter i MySQL og sender den sletta artikkelen tilbake
   */
-})
+  artikkelDao.deleteOne(req.params.id, (status, data) => {
+    res.status(status);
+    res.json(data);
+  });
+});
 
 const port = process.env.PORT || 8080;
 var server = app.listen(port);

@@ -1,0 +1,4 @@
+node_modules/
+coverage/
+pool.js
+dao/testConfig.js
