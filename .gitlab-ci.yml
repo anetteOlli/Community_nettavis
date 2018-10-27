@@ -21,7 +21,7 @@ run_tests:
     - npm test
   artifacts:
     paths:
-      - ../coverage/
+      - coverage/
 
 # Publish coverage report on gitlab-pages
 pages:
@@ -29,6 +29,7 @@ pages:
   dependencies:
     - run_tests
   script:
+    -cd ..
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public public
