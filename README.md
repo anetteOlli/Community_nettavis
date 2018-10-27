@@ -1,0 +1,2 @@
+to get the dao working: use the configSample.js with the correct credentials and rename it to "pool.js". "pool.js" should be in the root folder.
+To get the npm-test working: use the configSample.js with the correct test-database credentials and rename it to "testConfig.js" and keep it in the dao folder.
