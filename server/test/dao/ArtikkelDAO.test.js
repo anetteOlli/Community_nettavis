@@ -1,6 +1,6 @@
 var mysql = require("mysql");
 
-const ArtikkelDao = require("./ArtikkelDao.js");
+const ArtikkelDao = require("../../src/dao/ArtikkelDao.js");
 const runsqlfile = require("./runsqlfile.js");
 var config = require("./testConfig.js");
 
@@ -9,8 +9,8 @@ var pool = mysql.createPool(config);
 let artikkelDao = new ArtikkelDao(pool);
 
 beforeAll(done => {
-  runsqlfile("dao/create_tables.sql", pool, () => {
-    runsqlfile("dao/create_testdata.sql", pool, done);
+  runsqlfile("test/dao/create_tables.sql", pool, () => {
+    runsqlfile("test/dao/create_testdata.sql", pool, done);
   });
 });
 
@@ -98,7 +98,12 @@ test("update one article", done => {
         ", data=" +
         JSON.stringify(data)
     );
+    expect(data.length).toBe(1);
     expect(data[0].tittel).toBe("gaute");
+    expect(data[0].kategori).toBe("javascript");
+    expect(data[0].innhold).toBe("jdakgøjgkaølkfgjø");
+    expect(data[0].bildeLink).toBe("veadfadfien");
+    expect(data[0].isViktig).toBe(0);
     done();
   }
   artikkelDao.putOne(

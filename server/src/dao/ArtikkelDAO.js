@@ -2,7 +2,22 @@ const Dao = require("./dao.js");
 
 module.exports = class ArtikkelDao extends Dao {
   getAll(callback) {
-    super.query("SELECT * FROM Artikler", [], callback);
+    super.query(
+      "SELECT Artikler.tittel, Artikler.innhold, Artikler.bildeLink, Artikler.bildeTekst, Artikler.isViktig, AVG(rating_artikler.rating) AS avgRating, DATE_FORMAT(Artikler.tidspunktOpprettet, '%Y-%m-%d %H:%i') AS opprettet, DATE_FORMAT(Artikler.tidspunktEndret, '%Y-%m-%d %H:%i') AS endret  FROM Artikler LEFT JOIN rating_artikler ON(Artikler.id = rating_artikler.id) GROUP BY Artikler.id ORDER BY avgRating DESC",
+      [],
+      callback
+    );
+    /*
+    skal endres til:
+    SELECT Artikler.tittel, Artikler.innhold, Artikler.bildeLink, Artikler.bildeTekst,
+    Artikler.isViktig, AVG(rating_artikler.rating) AS avgRating,
+    DATE_FORMAT(Artikler.tidspunktOpprettet, '%Y-%m-%d %H:%i')
+    AS opprettet, DATE_FORMAT(Artikler.tidspunktEndret, '%Y-%m-%d %H:%i')
+    AS endret  FROM Artikler LEFT JOIN rating_artikler ON(Artikler.id = rating_artikler.id)
+    GROUP BY Artikler.id
+    sORDER BY avgRating DESC;
+
+    */
   }
 
   getOne(id, callback) {
