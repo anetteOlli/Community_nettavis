@@ -1,6 +1,6 @@
 var mysql = require("mysql");
 
-const ArtikkelDao = require("../../src/dao/ArtikkelDao.js");
+const ArtikkelDao = require("../../src/dao/ArtikkelDAO.js");
 const runsqlfile = require("./runsqlfile.js");
 var config = require("./testConfig.js");
 
