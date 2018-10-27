@@ -29,7 +29,7 @@ pages:
   dependencies:
     - run_tests
   script:
-    -cd ..
+    - cd ..
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public public
