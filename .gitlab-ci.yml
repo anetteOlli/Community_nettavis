@@ -18,6 +18,7 @@ before_script:
 run_tests:
   stage: test
   script:
+    - dir
     - npm test
   artifacts:
     paths:
@@ -29,7 +30,7 @@ pages:
   dependencies:
     - run_tests
   script:
-    - cd server
+    - dir
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public public
