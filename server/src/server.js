@@ -1,11 +1,16 @@
-var express = require("express");
+// @flow
+
+import express from "express";
 var mysql = require("mysql");
 var bodyParser = require("body-parser");
-const Joi = require("joi"); //er en klasse, derfor sto "J" i joi
-var app = express();
-const ArtikkelDao = require("./dao/ArtikkelDao.js");
-var config = require("./pool.js");
-//const pool = require("./connection.js"); //byttes ut med config fil?
+import Joi from "joi";
+let app = express();
+import fs from "fs";
+const ArtikkelDao = require("./dao/ArtikkelDAO.js");
+import config from "./pool.js";
+
+type Request = express$Request;
+type Response = express$Response;
 
 app.use(bodyParser.json()); // for å tolke JSON i body
 
@@ -15,6 +20,9 @@ var pool = mysql.createPool(config);
 
 let artikkelDao = new ArtikkelDao(pool);
 
+
+//poenget med dette er for å validere at json objekter som sendes inn er gyldige
+//hvis de ikke er bra nok, sender Joi 400-feil med beskrivelse av hva som manglet.
 const artikkel_skjema = {
   tittel: Joi.string()
     .min(3)
@@ -36,7 +44,7 @@ const artikkel_skjema = {
 
 app.use(express.static("public"));
 
-app.get("/api/artikler", (req, res) => {
+app.get("/api/artikler", (req: Request, res: Response) => {
   /*
   Henter ut alle artikler sortert etter dato, og rating?!
   */
@@ -46,7 +54,7 @@ app.get("/api/artikler", (req, res) => {
   });
 });
 
-app.get("/api/artikler/:id/", (req, res) => {
+app.get("/api/artikler/:id/", (req: Request, res: Response) => {
   /*
   Henter ut artikkelen med matchende artikkel nr
   Returnerer resource not found error hvis artikkel ikke finnes
@@ -57,7 +65,7 @@ app.get("/api/artikler/:id/", (req, res) => {
   });
 });
 
-app.get("/api/artikler/:kategori", (req, res) => {
+app.get("/api/artikler/:kategori", (req: Request, res: Response) => {
   /*
   Henter ut alle artikler med denne kategorien, sortert på dato
   Returnerer resource not found error hvis artikkel ikke finnes
@@ -68,7 +76,7 @@ app.get("/api/artikler/:kategori", (req, res) => {
   });
 });
 
-app.post("/api/artikler", (req, res) => {
+app.post("/api/artikler", (req: Request, res: Response) => {
   /*
   Henter JSON objekt og lagrer inn i mysql
   Viser siden med artikkelen som svar på requesten.
@@ -87,7 +95,7 @@ app.post("/api/artikler", (req, res) => {
   });
 });
 
-app.put("/api/artikler/:id", (req, res) => {
+app.put("/api/artikler/:id", (req: Request, res: Response) => {
   /*
   Denne skal endre artikkelen
   404 feil: finner ikke artikkelen vi skal endre
@@ -107,7 +115,7 @@ app.put("/api/artikler/:id", (req, res) => {
   });
 });
 
-app.delete("/api/artikler/:id", (req, res) => {
+app.delete("/api/artikler/:id", (req: Request, res: Response) => {
   console.log("fikk request på delete");
   /*
   404 feil: artikkelen vi ønsker å slette finnes ikke

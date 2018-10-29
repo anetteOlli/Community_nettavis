@@ -22,7 +22,7 @@ run_tests:
     - npm test
   artifacts:
     paths:
-      - /testresultater/
+      - coverage/
 
 # Publish coverage report on gitlab-pages
 pages:
@@ -32,7 +32,7 @@ pages:
   script:
     - dir
     - mkdir .public
-    - cp -r testresultater/* .public
+    - cp -r coverage/* .public
     - mv .public public
   artifacts:
     paths:
