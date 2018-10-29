@@ -18,8 +18,8 @@ before_script:
 run_tests:
   stage: test
   script:
-    - dir
     - npm test
+    - dir
   artifacts:
     paths:
       - coverage/
