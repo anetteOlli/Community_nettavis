@@ -14,12 +14,12 @@ type Response = express$Response;
 
 app.use(bodyParser.json()); // for å tolke JSON i body
 
+
 console.log(config);
 
 var pool = mysql.createPool(config);
 
 let artikkelDao = new ArtikkelDao(pool);
-
 
 //poenget med dette er for å validere at json objekter som sendes inn er gyldige
 //hvis de ikke er bra nok, sender Joi 400-feil med beskrivelse av hva som manglet.
@@ -84,7 +84,9 @@ app.post("/api/artikler", (req: Request, res: Response) => {
   */
   const result = Joi.validate(req.body, artikkel_skjema); //sjekker at req.body inneholder
   //de tingene vi forlanger at de skal inneholde
-  console.log(req.body.tittel); //henter ut verdien til json objekt med navn "brukernavn"
+  // $FlowFixMe
+  console.log(req.body.tittel + tittel); //henter ut verdien til json objekt med navn "brukernavn"
+  // $FlowFixMe
   var query1 = req.body.tittel;
   if (result.error) {
     res.status(400).send(result.error.details[0].message);

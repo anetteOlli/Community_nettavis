@@ -1,8 +1,11 @@
+
+
 module.exports = class Dao {
   constructor(pool) {
     // Dependency Injection
     this.pool = pool;
   }
+
 
   query(sql, params, callback) {
     this.pool.getConnection((err, connection) => {

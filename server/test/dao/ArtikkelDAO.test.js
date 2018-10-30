@@ -1,3 +1,5 @@
+// @flow
+
 var mysql = require("mysql");
 
 const ArtikkelDao = require("../../src/dao/ArtikkelDAO.js");
