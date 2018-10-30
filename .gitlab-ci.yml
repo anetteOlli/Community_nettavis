@@ -36,6 +36,6 @@ pages:
     - ls -la public
   artifacts:
     paths:
-      - public
+      - server/public
   only:
     - master
