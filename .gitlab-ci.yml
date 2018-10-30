@@ -32,10 +32,10 @@ pages:
     - ls -la
     - mkdir .public
     - cp -r coverage/* .public
-    - mv .public public
+    - mv .public ../public
     - ls -la public
   artifacts:
     paths:
-      - server/public
+      - public
   only:
     - master
