@@ -20,7 +20,7 @@ run_tests:
     - dir
   artifacts:
     paths:
-      - coverage/
+      - server/coverage/
 
 # Publish coverage report on gitlab-pages
 pages:
@@ -28,7 +28,7 @@ pages:
   dependencies:
     - run_tests
   script:
-    - dir
+    - ls -la
     - cd server
     - mkdir .public
     - cp -r coverage/* .public
