@@ -33,7 +33,7 @@ pages:
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public ../public
-    - ls -la public
+    - ls -la ../public
   artifacts:
     paths:
       - public
