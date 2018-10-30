@@ -29,6 +29,7 @@ pages:
     - run_tests
   script:
     - dir
+    - cd server
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public public
