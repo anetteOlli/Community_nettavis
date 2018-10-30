@@ -28,11 +28,12 @@ pages:
   dependencies:
     - run_tests
   script:
-    - ls -la
     - cd server
+    - ls -la
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public public
+    - ls -la public
   artifacts:
     paths:
       - public
