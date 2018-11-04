@@ -29,14 +29,14 @@ class sqlResult {
 module.exports = class ArtikkelDao extends Dao {
   getAll(callback: (Article[]) => mixed) {
     super.query(
-      "SELECT Artikler.tittel, Artikler.innhold, Artikler.bildeLink, Artikler.bildeTekst, Artikler.isViktig, AVG(rating_artikler.rating) AS avgRating, DATE_FORMAT(Artikler.tidspunktOpprettet, '%Y-%m-%d %H:%i') AS opprettet, DATE_FORMAT(Artikler.tidspunktEndret, '%Y-%m-%d %H:%i') AS endret  FROM Artikler LEFT JOIN rating_artikler ON(Artikler.id = rating_artikler.id) GROUP BY Artikler.id ORDER BY avgRating DESC",
+      "SELECT Artikler.id, Artikler.tittel, Artikler.innhold, Artikler.bildeLink, Artikler.bildeTekst, Artikler.isViktig, AVG(rating_artikler.rating) AS avgRating, DATE_FORMAT(Artikler.tidspunktOpprettet, '%Y-%m-%d %H:%i') AS opprettet, DATE_FORMAT(Artikler.tidspunktEndret, '%Y-%m-%d %H:%i') AS endret  FROM Artikler LEFT JOIN rating_artikler ON(Artikler.id = rating_artikler.id) GROUP BY Artikler.id ORDER BY avgRating DESC",
       [],
       callback
     );
   }
 
   getOne(id: string, callback: Article => mixed) {
-    super.query("select * from Artikler where id=?", [id], callback);
+    super.query("select id, tittel, innhold, bildeLink, bildeTekst, isViktig from Artikler where id=?", [id], callback);
   }
   getAllByCategory(kategori: string, callback: Article => mixed) {
     super.query(

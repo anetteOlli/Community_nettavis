@@ -2,6 +2,7 @@
 
 import express from "express";
 var mysql = require("mysql");
+import path from 'path';
 var bodyParser = require("body-parser");
 import Joi from "joi";
 let app = express();
@@ -12,7 +13,11 @@ import config from "./pool.js";
 type Request = express$Request;
 type Response = express$Response;
 
+const public_path = path.join(__dirname, '/../../client/public');
+app.use(express.static(public_path));
+
 app.use(bodyParser.json()); // for å tolke JSON i body
+
 
 
 console.log(config);
@@ -84,6 +89,7 @@ app.post("/api/artikler", (req: Request, res: Response) => {
   */
   const result = Joi.validate(req.body, artikkel_skjema); //sjekker at req.body inneholder
   //de tingene vi forlanger at de skal inneholde
+
   // $FlowFixMe
   console.log(req.body.tittel + tittel); //henter ut verdien til json objekt med navn "brukernavn"
   // $FlowFixMe
@@ -129,5 +135,11 @@ app.delete("/api/artikler/:id", (req: Request, res: Response) => {
   });
 });
 
-const port = process.env.PORT || 8080;
-var server = app.listen(port);
+const port = process.env.PORT || 3000;
+export let listen = new Promise<void>((resolve, reject) => {
+  app.listen(3000, error => {
+    if (error) reject(error.message);
+    console.log('Server started');
+    resolve();
+  });
+});
