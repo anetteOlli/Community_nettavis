@@ -78,16 +78,18 @@ class ArtikkelList extends Component {
 class ArticleDetails extends Component<{ match: { params: { id: number } } }> {
   artikkel = null;
 
+
   render() {
     if (!this.artikkel) return null;
 
     return (
       <div>
         <ul>
-        {console.log("forsøker å skrive ut artikkel resultatet: " + this.artikkel + " forsøker å hente ut artikkel data: " + this.artikkel.data)}
-          <li>Tittel: {this.artikkel.tittel}</li>
-          <li>Innhold: {this.artikkel.innhold}</li>
-          <li>BildeUrl: {this.artikkel.bildeLink}</li>
+        {console.log("forsøker å skrive ut artikkel resultatet: ", this.artikkel, ", vha json.stringify: " + JSON.stringify(this.artikkel) + " forsøker å hente ut artikkel data: " + this.artikkel[0].tittel)}
+        {console.log(this.artikkel)}
+          <li>Tittel: {this.artikkel[0].tittel}</li>
+          <li>Innhold: {this.artikkel[0].innhold}</li>
+          <li>BildeUrl: {this.artikkel[0].bildeLink}</li>
         </ul>
       </div>
     );

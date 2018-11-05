@@ -1,3 +1,4 @@
 server/node_modules/
 client/node_modules/
 pool.js
+client/public/bundle.js

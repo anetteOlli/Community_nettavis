@@ -1,5 +1,7 @@
 
 
+//ole-kristian sa jeg ikke trengte å ha flow her, siden klassen var så genrell.
+
 module.exports = class Dao {
   constructor(pool) {
     // Dependency Injection
