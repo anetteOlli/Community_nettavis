@@ -74,19 +74,20 @@ test("get all articles from db", done => {
   }
   artikkelDao.getAll(callback);
 });
+
 test("get all articles from db with category javascript", done => {
-  function callback(status, data){
+  function callback(status, data) {
     console.log(
       "test get all from specific category: status=" +
-      status +
-      ", data.lenght=" +
-      data.length
-      );
-      expect(data.length).toBeGreaterThanOrEqual(1);
-      done();
+        status +
+        ", data.lenght=" +
+        data.length
+    );
+    expect(data.length).toBeGreaterThanOrEqual(1);
+    done();
   }
-  artikkelDao.getAllByCategory('javascript', callback);
-  })
+  artikkelDao.getAllByCategory("javascript", callback);
+});
 
 test("delete one article", done => {
   function callback(status, data) {

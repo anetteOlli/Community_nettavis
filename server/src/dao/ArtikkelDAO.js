@@ -35,8 +35,12 @@ module.exports = class ArtikkelDao extends Dao {
     );
   }
 
-  getOne(id: string, callback: (Article) => mixed) {
-    super.query("select id, kategori, tittel, innhold, bildeLink, bildeTekst, isViktig from Artikler where id=?", [id], callback);
+  getOne(id: string, callback: Article => mixed) {
+    super.query(
+      "select id, kategori, tittel, innhold, bildeLink, bildeTekst, isViktig from Artikler where id=?",
+      [id],
+      callback
+    );
   }
   getAllByCategory(kategori: string, callback: Article => mixed) {
     super.query(
@@ -46,7 +50,7 @@ module.exports = class ArtikkelDao extends Dao {
     );
   }
 
-  createOne(json: Article, callback: (sqlResult) => mixed) {
+  createOne(json: Article, callback: sqlResult => mixed) {
     var val = [
       json.tittel,
       json.kategori,
@@ -62,12 +66,12 @@ module.exports = class ArtikkelDao extends Dao {
     );
   }
 
-  deleteOne(id: string, callback: (sqlResult) => mixed) {
+  deleteOne(id: string, callback: sqlResult => mixed) {
     super.query("DELETE FROM rating_artikler WHERE id=?", [id], () =>
       super.query("DELETE FROM Artikler WHERE id=?", [id], callback)
     );
   }
-  putOne(json: Article, callback: (sqlResult) => mixed) {
+  putOne(json: Article, callback: sqlResult => mixed) {
     var val = [
       json.tittel,
       json.kategori,
