@@ -12,6 +12,17 @@ class Article {
   bildeTekst: String;
 }
 
+class SQLResult {
+  fieldCount: number;
+  affectedRows: number;
+  insertId: number;
+  serverStatus: number;
+  warningCount: number;
+  message: string;
+  protocol41: boolean;
+  changedRows: number;
+}
+
 class ArtikkelService {
   getArticles(): Promise<Article[]> {
     return axios.get('/api/artikler');
@@ -22,8 +33,11 @@ class ArtikkelService {
     return axios.get('/api/artikler/' + id);
   }
 
-  updateArticle(article: Article): Promise<void> {
+  updateArticle(article: Article): Promise<SQLResult> {
     return axios.put('/api/artikler/', article);
+  }
+  addArticle(article : Article) : Promise<SQLResult>{
+    return axios.post('/api/artikler', article);
   }
 }
 export let artikkelService = new ArtikkelService();

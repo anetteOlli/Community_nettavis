@@ -11,7 +11,7 @@ CREATE TABLE Artikler(
 	id INTEGER AUTO_INCREMENT,
 	kategori VARCHAR(30) NOT NULL,
 	innhold TEXT NOT NULL,
-	bildeLink VARCHAR(50),
+	bildeLink VARCHAR(2000),
 	bildeTekst TEXT,
 	isViktig BOOLEAN NOT NULL,
 	tidspunktOpprettet DATETIME,

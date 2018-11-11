@@ -19,7 +19,6 @@ app.use(express.static(public_path));
 app.use(bodyParser.json()); // for å tolke JSON i body
 
 
-
 console.log(config);
 
 var pool = mysql.createPool(config);
@@ -42,8 +41,8 @@ const artikkel_skjema = {
     .min(0)
     .max(1)
     .required(),
-  bildeLink: Joi.string().min(10),
-  bildeTekst: Joi.string().min(15),
+  bildeLink: Joi.string().allow(''),
+  bildeTekst: Joi.string().allow(''),
   id: Joi.number()
 };
 
@@ -90,10 +89,6 @@ app.post("/api/artikler", (req: Request, res: Response) => {
   const result = Joi.validate(req.body, artikkel_skjema); //sjekker at req.body inneholder
   //de tingene vi forlanger at de skal inneholde
 
-  // $FlowFixMe
-  console.log(req.body.tittel + tittel); //henter ut verdien til json objekt med navn "brukernavn"
-  // $FlowFixMe
-  var query1 = req.body.tittel;
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
   }
