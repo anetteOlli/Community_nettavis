@@ -91,11 +91,12 @@ app.post("/api/artikler", (req: Request, res: Response) => {
 
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
+  }else{
+    artikkelDao.createOne(req.body, (status, data) => {
+      res.status(status);
+      res.json(data);
+    });
   }
-  artikkelDao.createOne(req.body, (status, data) => {
-    res.status(status);
-    res.json(data);
-  });
 });
 
 app.put("/api/artikler/:id", (req: Request, res: Response) => {
@@ -110,12 +111,13 @@ app.put("/api/artikler/:id", (req: Request, res: Response) => {
   const result = Joi.validate(req.body, artikkel_skjema);
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
+  }else{
+    artikkelDao.putOne(req.body, (status, data) => {
+      res.status(status);
+      res.json(data);
+    });
   }
 
-  artikkelDao.putOne(req.body, (status, data) => {
-    res.status(status);
-    res.json(data);
-  });
 });
 
 app.delete("/api/artikler/:id", (req: Request, res: Response) => {

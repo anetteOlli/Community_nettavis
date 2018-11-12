@@ -38,7 +38,7 @@ module.exports = class ArtikkelDao extends Dao {
 
   getOne(id: string, callback: Article => mixed) {
     super.query(
-      "select id, kategori, tittel, innhold, bildeLink, bildeTekst, isViktig from Artikler where id=?",
+      "select id, kategori, tittel, innhold, bildeLink, bildeTekst, isViktig, DATE_FORMAT(tidspunktOpprettet, '%Y-%m-%d %H:%i') AS opprettet, DATE_FORMAT(tidspunktEndret, '%Y-%m-%d %H:%i') AS endret from Artikler where id=?",
       [id],
       callback
     );

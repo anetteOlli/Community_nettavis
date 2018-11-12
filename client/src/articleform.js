@@ -1,8 +1,21 @@
+// @flow
+/* eslint eqeqeq: "off" */
+
+
 import * as React from 'react';
 import { Component } from 'react-simplified';
 
 
-export class FormGroupText extends Component{
+type Props ={
+  description?: string,
+  type?: string,
+  type?: string,
+  value?: string,
+  onChange?: mixed,
+  onClick?: mixed,
+  children?: React.Node
+}
+export class FormGroupText extends Component<Props>{
 
   render(){
     return (
@@ -10,18 +23,22 @@ export class FormGroupText extends Component{
           <label> {this.props.description}
             </label>
             <input className='form-control'
-                type={this.props.type} onChange={this.props.onChange}/>
+                type={this.props.type}
+                value={this.props.value}
+                onChange={this.props.onChange}/>
         </div>
     );
   }
 }
 
-export class CheckBox extends Component{
+
+
+export class CheckBox extends Component<Props>{
 
   render(){
     return (
       <div className='form-group form-check'>
-        <input type="checkbox" className='form-check-input' value='1' onChange={this.props.onChange} />
+        <input type="checkbox" className='form-check-input' value={this.props.value} onChange={this.props.onChange}/>
         <label className='form-check-label'> {this.props.description}
         </label>
       </div>
@@ -29,7 +46,7 @@ export class CheckBox extends Component{
   }
 }
 
-export class FormGroupTextArea extends Component{
+export class FormGroupTextArea extends Component<Props>{
   render(){
     return (
       <div className='form-group'>
@@ -37,12 +54,13 @@ export class FormGroupTextArea extends Component{
             </label>
             <textarea className='form-control'
                 onChange={this.props.onChange}
+                value={this.props.value}
                 rows='15'/>
         </div>
     );
   }
 }
-export class DefaultSelect extends Component{
+export class DefaultSelect extends Component<Props>{
   render(){
     return (
       <div className='formgroup' onChange={this.props.onChange}>
@@ -54,7 +72,7 @@ export class DefaultSelect extends Component{
     );
   }
 }
-export class SaveButton extends Component{
+export class SaveButton extends Component<Props>{
   render(){
     return (
         <button type="submit" className="btn btn-primary" onClick={this.props.onClick}>Submit</button>
