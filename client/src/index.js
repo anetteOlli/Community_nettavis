@@ -4,9 +4,10 @@ import ReactDOM from 'react-dom';
 import * as React from 'react';
 import { Component } from 'react-simplified';
 import { HashRouter, Route, NavLink } from 'react-router-dom';
-import { Alert, NavBar, NavBarA } from './widgets';
+import { Alert, NavBar, NavBarA, Card, CardBody, CardFooter, CardImg } from './widgets';
 import { artikkelService } from './services';
 import {FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect} from './articleform';
+import { Motion, spring } from "react-motion";
 
 
 
@@ -23,23 +24,45 @@ class Home extends Component {
 
 class ArtikkelList extends Component {
   artikler = [];
+  nyligeArtikler = [];
 
 
   render() {
     return (
-      <ul>
+      <div>
+
+      {console.log('nylige artikler' , this.nyligeArtikler)}
+      <Motion
+        defaultStyle={{ x: 400}}
+        style={{
+          x: spring(-1000 , {stiffness: 5})
+        }}
+      >
+        {(style) => (
+          <ul className='nav'
+            style={{
+              transform: `translateX(${style.x}px)`
+            }}
+          >
+            {this.nyligeArtikler.map(artikkel =>(
+              <li key={artikkel.id} className='nav-item'>
+              <a  href={'#/api/artikler/' + artikkel.id}> {artikkel.tittel} </a>
+              </li>
+              ))}
+          </ul>
+        )}
+      </Motion>
         {this.artikler.map(artikkel => (
-          <li key={artikkel.id}>
-            {console.log(artikkel)}
-            <NavLink activeStyle={{ color: 'darkblue' }} exact to={'/api/artikler/' + artikkel.id}>
-              {artikkel.tittel}
-            </NavLink>{' '}
-            <NavLink activeStyle={{ color: 'darkblue' }} to={'/api/artikler/' + artikkel.id + '/edit'}>
-              edit
-            </NavLink>
-          </li>
+          <Card key={artikkel.id}>
+          <CardBody title={artikkel.tittel} >
+          {console.log(artikkel)}
+          <CardImg src={artikkel.bildeLink} alt={artikkel.bildeTekst} />
+          <a href={'#/api/artikler/' + artikkel.id} > les mer </a>
+          </CardBody>
+          <CardFooter>Dato opprettet: {artikkel.opprettet} </CardFooter>
+          </Card>
         ))}
-      </ul>
+      </div>
     );
   }
 
@@ -52,6 +75,14 @@ class ArtikkelList extends Component {
         if(this.artikler.length > 20){
           this.artikler.length = 20;
         }
+        var now = new Date();
+        var oneDayAgo = (now.getDate() - 1);
+        console.log(now);
+        //filtrere artikler som skal benyttes til å generere marquees'en:
+        this.nyligeArtikler = this.artikler.filter(function(article, i){
+            return (Date.parse(article.opprettet) > oneDayAgo && i < 5 );
+          });
+        console.log(this.nyligeArtikler [0]);
         })
       .catch((error: Error) => Alert.danger(error.message));
   }
@@ -174,10 +205,10 @@ class NavBarHolder extends Component{
   render(){
     return(
       <NavBar home='#/api/artikler' title='Hello News'>
-        <NavBarA href='#/api/artikkel/kategori/javascript'> Javascript </NavBarA>
+        <NavBarA href='#/api/artikkel/kategori/internet-of-shit'> Internet of shit </NavBarA>
         <NavBarA href='#/api/artikkel/kategori/matlaging'> Matlaging </NavBarA>
         <NavBarA href='#/api/artikkel/kategori/agurkNytt'> Agurknytt </NavBarA>
-        <NavBarA href='#/api/artikkel/lagNyhet'> Lag drama </NavBarA>
+        <NavBarA href='#/api/artikkel/lagNyhet'> publiser nyhet </NavBarA>
       </NavBar>
       );
   }
@@ -193,7 +224,7 @@ class CreateArticle extends Component{
       article :{
         tittel : '',
         innhold : '',
-        kategori : '',
+        kategori : 'matlaging',   //setter verdi til matlagin som er det øverste som kommer opp på options
         bildeLink : '',
         isViktig : 0,
         bildeTekst : '',
@@ -224,7 +255,7 @@ class CreateArticle extends Component{
             onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
                            this.state.article.kategori = event.target.value;}}>
                            <option value='matlaging'> matlaging </option>
-                           <option value='javascript'> javascript </option>
+                           <option value='internetOfShit'> internet of shit </option>
                            <option value='agurknytt'> agurknytt </option>
           </DefaultSelect>
         <FormGroupText
@@ -264,12 +295,14 @@ if (root)
       <div>
         <Alert />
         <NavBarHolder/>
+        <div className='container'>
         <Route exact path="/" component={Home} />
         <Route exact path="/api/artikler" component={ArtikkelList} />
         <Route exact path="/api/artikler/:id" component={ArticleDetails} />
         <Route exact path="/api/artikler/:id/edit" component={ArticleEdit} />
         <Route exact path="/api/artikkel/lagNyhet" component={CreateArticle} />
         <Route exact path="/api/artikler/kategori/:kategori" component={ArticleByCategory}/>
+        </div>
       </div>
     </HashRouter>,
     root

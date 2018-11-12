@@ -1,0 +1,9 @@
+
+.example-appear {
+  transform: translateX(0);
+}
+
+.example-appear.example-appear-active {
+  transform: translateX(100%);
+  transition: transform 300ms ease-in;
+}
