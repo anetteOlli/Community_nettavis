@@ -2,7 +2,7 @@
 
 import express from "express";
 var mysql = require("mysql");
-import path from 'path';
+import path from "path";
 var bodyParser = require("body-parser");
 import Joi from "joi";
 let app = express();
@@ -13,11 +13,33 @@ import config from "./pool.js";
 type Request = express$Request;
 type Response = express$Response;
 
-const public_path = path.join(__dirname, '/../../client/public');
+const public_path = path.join(__dirname, "/../../client/public");
 app.use(express.static(public_path));
 
 app.use(bodyParser.json()); // for å tolke JSON i body
 
+class Article {
+  tittel: string;
+  innhold: string;
+  id: number;
+  kategori: string;
+  bildeLink: string;
+  bildeTekst: string;
+  isViktig: boolean;
+  avgRating: number;
+  opprettet: string;
+  endret: string;
+}
+class sqlResult {
+  fieldCount: number;
+  affectedRows: number;
+  insertId: number;
+  serverStatus: number;
+  warningCount: number;
+  message: string;
+  protocol41: boolean;
+  changedRows: number;
+}
 
 console.log(config);
 
@@ -41,8 +63,8 @@ const artikkel_skjema = {
     .min(0)
     .max(1)
     .required(),
-  bildeLink: Joi.string().allow(''),
-  bildeTekst: Joi.string().allow(''),
+  bildeLink: Joi.string().allow(""),
+  bildeTekst: Joi.string().allow(""),
   id: Joi.number()
 };
 
@@ -52,7 +74,7 @@ app.get("/api/artikler", (req: Request, res: Response) => {
   /*
   Henter ut alle artikler sortert etter dato, og rating?!
   */
-  artikkelDao.getAll((status, data) => {
+  artikkelDao.getAll((status, data: Article[]) => {
     res.status(status);
     res.json(data);
   });
@@ -63,7 +85,7 @@ app.get("/api/artikler/:id/", (req: Request, res: Response) => {
   Henter ut artikkelen med matchende artikkel nr
   Returnerer resource not found error hvis artikkel ikke finnes
   */
-  artikkelDao.getOne(req.params.id, (status, data) => {
+  artikkelDao.getOne(req.params.id, (status, data: Article[]) => {
     res.status(status);
     res.json(data);
   });
@@ -74,10 +96,13 @@ app.get("/api/artikler/:kategori", (req: Request, res: Response) => {
   Henter ut alle artikler med denne kategorien, sortert på dato
   Returnerer resource not found error hvis artikkel ikke finnes
   */
-  artikkelDao.getAllByCategory(req.params.kategori, (status, data) => {
-    res.status(status);
-    res.json(data);
-  });
+  artikkelDao.getAllByCategory(
+    req.params.kategori,
+    (status: number, data: Article[]) => {
+      res.status(status);
+      res.json(data);
+    }
+  );
 });
 
 app.post("/api/artikler", (req: Request, res: Response) => {
@@ -91,8 +116,8 @@ app.post("/api/artikler", (req: Request, res: Response) => {
 
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
-  }else{
-    artikkelDao.createOne(req.body, (status, data) => {
+  } else {
+    artikkelDao.createOne(req.body, (status: number, data: sqlResult) => {
       res.status(status);
       res.json(data);
     });
@@ -111,13 +136,12 @@ app.put("/api/artikler/:id", (req: Request, res: Response) => {
   const result = Joi.validate(req.body, artikkel_skjema);
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
-  }else{
-    artikkelDao.putOne(req.body, (status, data) => {
+  } else {
+    artikkelDao.putOne(req.body, (status: number, data: sqlResult) => {
       res.status(status);
       res.json(data);
     });
   }
-
 });
 
 app.delete("/api/artikler/:id", (req: Request, res: Response) => {
@@ -126,7 +150,7 @@ app.delete("/api/artikler/:id", (req: Request, res: Response) => {
   404 feil: artikkelen vi ønsker å slette finnes ikke
   Hvis ok -> sletter i MySQL og sender den sletta artikkelen tilbake
   */
-  artikkelDao.deleteOne(req.params.id, (status, data) => {
+  artikkelDao.deleteOne(req.params.id, (status: number, data: sqlResult) => {
     res.status(status);
     res.json(data);
   });
@@ -136,7 +160,7 @@ const port = process.env.PORT || 3000;
 export let listen = new Promise<void>((resolve, reject) => {
   app.listen(3000, error => {
     if (error) reject(error.message);
-    console.log('Server started');
+    console.log("Server started");
     resolve();
   });
 });

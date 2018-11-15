@@ -41,9 +41,6 @@ type Props = {
   tidspunkt?: Date,
   isViktig?: number
 };
-type State = {
-  article?: Article
-};
 
 class ArtikkelList extends Component {
   artikler : Article[] = [];
@@ -158,7 +155,7 @@ class ArticleDetails extends Component<{ match: { params: { id: number } } }> {
 class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
   //$FlowFixMe
   artikkel : Article = null;
-  isViktig : number = 0;
+  isViktig : number = -1;
 
   render() {
     if (!this.artikkel) return null;
@@ -212,7 +209,7 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
             description="fjern fra hovedsiden"
             value="0"
             onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-              this.artikkel.isViktig = parseInt(event.target.value);
+              this.isViktig = parseInt(event.target.value);
             }}
           />
         ) : (
@@ -220,7 +217,7 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
             description="publiser på hovedsiden"
             value="1"
             onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-              this.artikkel.isViktig = parseInt(event.target.value);
+              this.isViktig = parseInt(event.target.value);
             }}
           />
         )}
@@ -243,6 +240,7 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
   save() {
     if (!this.artikkel) return null;
     console.log('hva er artikkelen: ', this.artikkel);
+    if(this.isViktig > -1) this.artikkel.isViktig = this.isViktig;
     delete this.artikkel.opprettet; //TODO: finn en mer "pure" måte å gjøre dette på
     delete this.artikkel.endret; //TODO: finn en mer "pure" måte å gjøre dette på
 
@@ -275,22 +273,15 @@ class NavBarHolder extends Component {
 }
 
 class CreateArticle extends Component {
-  constructor(props :Props) {
-    super(props);
-    // $FlowFixMe
-    this.state = {
-      article:  {
-        tittel: '',
-        innhold: '',
-        kategori: 'matlaging', //setter verdi til matlagin som er det øverste som kommer opp på options
-        bildeLink: '',
-        isViktig: 0,
-        bildeTekst: ''
-      }
-    };
-    // $FlowFixMe
-    this.save = this.save.bind(this);
+  article =  {
+    tittel: '',
+    innhold: '',
+    kategori: 'matlaging', //setter verdi til matlagin som er det øverste som kommer opp på options
+    bildeLink: '',
+    isViktig: 0,
+    bildeTekst: ''
   }
+
 
   render() {
     return (
@@ -300,21 +291,21 @@ class CreateArticle extends Component {
           description="Tittel"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
-            this.state.article.tittel = event.target.value;
+            this.article.tittel = event.target.value;
           }}
         />
         <FormGroupTextArea
           description="Innhold"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
-            this.state.article.innhold = event.target.value;
+            this.article.innhold = event.target.value;
           }}
         />
         <DefaultSelect
           description="kategori"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
-            this.state.article.kategori = event.target.value;
+            this.article.kategori = event.target.value;
           }}
         >
           <option value="matlaging"> matlaging </option>
@@ -326,23 +317,28 @@ class CreateArticle extends Component {
           description="bildelenke"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
-            this.state.article.bildeLink = event.target.value;
+            this.article.bildeLink = event.target.value;
           }}
         />
+
         <FormGroupText
           type="text"
           description="bildetekst"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
-            this.state.article.bildeTekst = event.target.value;
+            this.article.bildeTekst = event.target.value;
           }}
         />
 
         <CheckBox
           description="publiser på hovedsiden"
+          value='1'
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
-            this.state.article.isViktig = event.target.value;
+            console.log(event.target.value);
+            // this.article.isViktig = event.target.value;
+            this.article.isViktig === 1? this.article.isViktig = 0 : this.article.isViktig = 1;
+            console.log(this.article.isViktig, 'skriver ut verdi av this.article.isViktig');
           }}
         />
         <SaveButton onClick={this.save} />
@@ -350,10 +346,11 @@ class CreateArticle extends Component {
     );
   }
   save() {
-    console.log('trying to add article:', this.state);
+    console.log(this.article);
+    // console.log('trying to add article:', this.state);
     artikkelService
       // $FlowFixMe
-      .addArticle(this.state.article)
+      .addArticle(this.article)
       .then(data => {
         console.log('artikkel er lagret', data.insertId);
         history.push('/api/artikler/' + data.insertId.toString());

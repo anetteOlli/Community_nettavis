@@ -194,18 +194,18 @@ export class FormGroupText extends Component<Props>{
   }
 }
 
-export class CheckBox extends Component<Props>{
-
-  render(){
-    return (
-      <div className='form-group form-check'>
-        <input type="checkbox" className='form-check-input' value='1' onChange={this.props.onChange} />
-        <label className='form-check-label'> {this.props.description}
-        </label>
-      </div>
-    );
-  }
-}
+// export class CheckBox extends Component<Props>{
+//
+//   render(){
+//     return (
+//       <div className='form-group form-check'>
+//         <input type="checkbox" className='form-check-input' value='1' onChange={this.props.onChange} />
+//         <label className='form-check-label'> {this.props.description}
+//         </label>
+//       </div>
+//     );
+//   }
+// }
 
 export class FormGroupTextArea extends Component<Props>{
   render(){
