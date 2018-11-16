@@ -18,6 +18,7 @@ run_tests:
     - npm test
     - dir
     - cd .. /client
+    - dir
     - npm install
     - npm test
   artifacts:
