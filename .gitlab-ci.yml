@@ -9,7 +9,6 @@ variables:
   MYSQL_DATABASE: supertestdb
   MYSQL_ROOT_PASSWORD: secret
 
-
 # Run JEST tests
 run_tests:
   stage: test
@@ -18,6 +17,9 @@ run_tests:
     - npm install
     - npm test
     - dir
+    - cd .. /client
+    - npm install
+    - npm test
   artifacts:
     paths:
       - server/coverage/
