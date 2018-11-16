@@ -51,7 +51,7 @@ test("add article to db", done => {
   artikkelDao.createOne(
     {
       tittel: "mumitrollet",
-      kategori: "java",
+      kategori: "internet-of-shit",
       innhold: "kjsgljgksfkjljbkj",
       bildeLink: "wwww.mumitrollet.com",
       bildeTekst: "mumitrollet i båt",
@@ -75,7 +75,7 @@ test("get all articles from db", done => {
   artikkelDao.getAll(callback);
 });
 
-test("get all articles from db with category javascript", done => {
+test("get all articles from db with category agurknytt", done => {
   function callback(status, data) {
     console.log(
       "test get all from specific category: status=" +
@@ -86,7 +86,7 @@ test("get all articles from db with category javascript", done => {
     expect(data.length).toBeGreaterThanOrEqual(1);
     done();
   }
-  artikkelDao.getAllByCategory("javascript", callback);
+  artikkelDao.getAllByCategory("agurknytt", callback);
 });
 
 test("delete one article", done => {
@@ -116,7 +116,7 @@ test("update one article", done => {
     );
     expect(data.length).toBe(1);
     expect(data[0].tittel).toBe("gaute");
-    expect(data[0].kategori).toBe("javascript");
+    expect(data[0].kategori).toBe("agurknytt");
     expect(data[0].innhold).toBe("jdakgøjgkaølkfgjø");
     expect(data[0].bildeLink).toBe("veadfadfien");
     expect(data[0].isViktig).toBe(0);
@@ -126,7 +126,7 @@ test("update one article", done => {
     {
       id: 2,
       tittel: "gaute",
-      kategori: "javascript",
+      kategori: "agurknytt",
       innhold: "jdakgøjgkaølkfgjø",
       bildeLink: "veadfadfien",
       isViktig: 0

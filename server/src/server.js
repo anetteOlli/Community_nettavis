@@ -70,7 +70,7 @@ const artikkel_skjema = {
 
 app.use(express.static("public"));
 
-app.get("/api/artikler", (req: Request, res: Response) => {
+app.get("/artikler", (req: Request, res: Response) => {
   /*
   Henter ut alle artikler sortert etter dato, og rating?!
   */
@@ -80,7 +80,7 @@ app.get("/api/artikler", (req: Request, res: Response) => {
   });
 });
 
-app.get("/api/artikler/:id/", (req: Request, res: Response) => {
+app.get("/artikler/:id/", (req: Request, res: Response) => {
   /*
   Henter ut artikkelen med matchende artikkel nr
   Returnerer resource not found error hvis artikkel ikke finnes
@@ -91,7 +91,7 @@ app.get("/api/artikler/:id/", (req: Request, res: Response) => {
   });
 });
 
-app.get("/api/artikler/:kategori", (req: Request, res: Response) => {
+app.get("/artikler/kategori/:kategori", (req: Request, res: Response) => {
   /*
   Henter ut alle artikler med denne kategorien, sortert på dato
   Returnerer resource not found error hvis artikkel ikke finnes
@@ -105,7 +105,7 @@ app.get("/api/artikler/:kategori", (req: Request, res: Response) => {
   );
 });
 
-app.post("/api/artikler", (req: Request, res: Response) => {
+app.post("/artikler", (req: Request, res: Response) => {
   /*
   Henter JSON objekt og lagrer inn i mysql
   Viser siden med artikkelen som svar på requesten.
@@ -124,7 +124,7 @@ app.post("/api/artikler", (req: Request, res: Response) => {
   }
 });
 
-app.put("/api/artikler/:id", (req: Request, res: Response) => {
+app.put("/artikler/:id", (req: Request, res: Response) => {
   /*
   Denne skal endre artikkelen
   404 feil: finner ikke artikkelen vi skal endre
@@ -144,7 +144,7 @@ app.put("/api/artikler/:id", (req: Request, res: Response) => {
   }
 });
 
-app.delete("/api/artikler/:id", (req: Request, res: Response) => {
+app.delete("/artikler/:id", (req: Request, res: Response) => {
   console.log("fikk request på delete");
   /*
   404 feil: artikkelen vi ønsker å slette finnes ikke

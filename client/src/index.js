@@ -21,7 +21,7 @@ import { artikkelService } from './services';
 import { FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect } from './articleform';
 import { Motion, spring } from 'react-motion';
 import Marquee from 'react-smooth-marquee';
-import {Article} from './datastructures';
+import { Article } from './datastructures';
 
 import createHashHistory from 'history/createHashHistory';
 const history = createHashHistory(); // Use history.push(...) to programmatically change path, for instance after successfully saving a student
@@ -31,7 +31,6 @@ class Home extends Component {
     return <div>React example with component state</div>;
   }
 }
-
 
 type Props = {
   children?: React.Node,
@@ -43,9 +42,9 @@ type Props = {
 };
 
 class ArtikkelList extends Component {
-  artikler : Article[] = [];
-  nyligeArtikler : Article[] = [];
-  tidspunkt : Date = new Date();
+  artikler: Article[] = [];
+  nyligeArtikler: Article[] = [];
+  tidspunkt: Date = new Date();
 
   render() {
     return (
@@ -53,7 +52,7 @@ class ArtikkelList extends Component {
         {console.log('nylige artikler', this.nyligeArtikler)}
         <Marquee>
           {this.nyligeArtikler.map(artikkel => (
-            <a className="nav-link d-inline " key={artikkel.id} href={'#/api/artikler/' + artikkel.id}>
+            <a className="nav-link d-inline " key={artikkel.id} href={'#/artikler/' + artikkel.id}>
               {' '}
               {artikkel.tittel}
               {' ' + artikkel.opprettet.slice(10)}{' '}
@@ -65,7 +64,7 @@ class ArtikkelList extends Component {
             <CardBody title={artikkel.tittel}>
               {console.log(artikkel)}
               <CardImg src={artikkel.bildeLink} alt={artikkel.bildeTekst} />
-              <a href={'#/api/artikler/' + artikkel.id}> les mer </a>
+              <a href={'#/artikler/' + artikkel.id}> les mer </a>
             </CardBody>
             <CardFooter>Dato opprettet: {artikkel.opprettet} </CardFooter>
           </Card>
@@ -88,10 +87,12 @@ class ArtikkelList extends Component {
         }
         const now = new Date();
         const oneDayAgo = now.getDate() - 1;
+        const yesterday = new Date();
+        yesterday.setDate(oneDayAgo);
         console.log(now);
         //filtrere artikler som skal benyttes til å generere marquees'en:
         this.nyligeArtikler = this.artikler.filter(function(article, i) {
-          return Date.parse(article.opprettet) > oneDayAgo && i < 3;
+          return Date.parse(article.opprettet) > yesterday && i < 3;
         });
         console.log(this.nyligeArtikler[0]);
       })
@@ -137,25 +138,23 @@ class ArticleDetails extends Component<{ match: { params: { id: number } } }> {
   delete() {
     console.log('registrerte klikk');
     artikkelService
-      .deleteArticle(
-        this.artikkel.id
-      )
+      .deleteArticle(this.artikkel.id)
       .then(data => {
         console.log('artikkel er slettet', data.insertId);
-        history.push('/api/artikler/');
+        history.push('//artikler/');
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
   edit() {
     console.log('registrerte edit button click');
-    history.push('/api/artikler/' + this.artikkel.id + '/edit');
+    history.push('/artikler/' + this.artikkel.id + '/edit');
   }
 }
 
 class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
   //$FlowFixMe
-  artikkel : Article = null;
-  isViktig : number = -1;
+  artikkel: Article = null;
+  isViktig: number = -1;
 
   render() {
     if (!this.artikkel) return null;
@@ -240,7 +239,7 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
   save() {
     if (!this.artikkel) return null;
     console.log('hva er artikkelen: ', this.artikkel);
-    if(this.isViktig > -1) this.artikkel.isViktig = this.isViktig;
+    if (this.isViktig > -1) this.artikkel.isViktig = this.isViktig;
     delete this.artikkel.opprettet; //TODO: finn en mer "pure" måte å gjøre dette på
     delete this.artikkel.endret; //TODO: finn en mer "pure" måte å gjøre dette på
 
@@ -249,39 +248,66 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
       .then(() => {
         let artikkelList = ArtikkelList.instance();
         if (artikkelList) artikkelList.mounted(); // Update Studentlist-component
-        if (this.artikkel) history.push('/api/artikler/' + this.artikkel.id);
+        if (this.artikkel) history.push('/artikler/' + this.artikkel.id);
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
 }
-class ArticleByCategory extends Component {
+class ArticleByCategory extends Component<{ match: { params: { kategori: string } } }> {
+  artikler: Article[] = [];
   render() {
-    return <p> sadfadfajfkøl ajkødlkfjad ø </p>;
+    return (
+      <div>
+        <h1>
+          {' '}
+          {//skriver ut kategorien vi er inne på som overskift
+          this.props.match.params.kategori.split('-').join(' ')}{' '}
+        </h1>
+        {this.artikler.map(artikkel => (
+          <Card key={artikkel.id}>
+            <CardBody title={artikkel.tittel}>
+              {console.log(artikkel)}
+              <CardImg src={artikkel.bildeLink} alt={artikkel.bildeTekst} />
+              <a href={'#/artikler/' + artikkel.id}> les mer </a>
+            </CardBody>
+            <CardFooter>Dato opprettet: {artikkel.opprettet} </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  mounted() {
+    artikkelService
+      .getArticlesByCategory(this.props.match.params.kategori)
+      .then(artikler => (this.artikler = artikler))
+      .catch((error: Error) => Alert.danger(error.message));
   }
 }
 class NavBarHolder extends Component {
   render() {
     return (
-      <NavBar home="#/api/artikler" title="Hello News">
-        <NavBarA href="#/api/artikkel/kategori/internet-of-shit"> Internet of shit </NavBarA>
-        <NavBarA href="#/api/artikkel/kategori/matlaging"> Matlaging </NavBarA>
-        <NavBarA href="#/api/artikkel/kategori/agurkNytt"> Agurknytt </NavBarA>
-        <NavBarA href="#/api/artikkel/lagNyhet"> publiser nyhet </NavBarA>
+      <NavBar home="#/artikler" title="Hello News">
+        <NavBarA href="#/artikler/kategori/internet-of-shit">
+          {' '}
+          Internet of <del>things</del> shit{' '}
+        </NavBarA>
+        <NavBarA href="#/artikler/kategori/matlaging"> Matlaging </NavBarA>
+        <NavBarA href="#/artikler/kategori/agurknytt"> Agurknytt </NavBarA>
+        <NavBarA href="#/artikler/lagNyhet"> publiser nyhet </NavBarA>
       </NavBar>
     );
   }
 }
 
 class CreateArticle extends Component {
-  article =  {
+  article = {
     tittel: '',
     innhold: '',
     kategori: 'matlaging', //setter verdi til matlagin som er det øverste som kommer opp på options
     bildeLink: '',
     isViktig: 0,
     bildeTekst: ''
-  }
-
+  };
 
   render() {
     return (
@@ -309,7 +335,7 @@ class CreateArticle extends Component {
           }}
         >
           <option value="matlaging"> matlaging </option>
-          <option value="internetOfShit"> internet of shit </option>
+          <option value="internet-of-shit"> internet of shit </option>
           <option value="agurknytt"> agurknytt </option>
         </DefaultSelect>
         <FormGroupText
@@ -332,12 +358,12 @@ class CreateArticle extends Component {
 
         <CheckBox
           description="publiser på hovedsiden"
-          value='1'
+          value="1"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             // $FlowFixMe
             console.log(event.target.value);
             // this.article.isViktig = event.target.value;
-            this.article.isViktig === 1? this.article.isViktig = 0 : this.article.isViktig = 1;
+            this.article.isViktig === 1 ? (this.article.isViktig = 0) : (this.article.isViktig = 1);
             console.log(this.article.isViktig, 'skriver ut verdi av this.article.isViktig');
           }}
         />
@@ -353,7 +379,7 @@ class CreateArticle extends Component {
       .addArticle(this.article)
       .then(data => {
         console.log('artikkel er lagret', data.insertId);
-        history.push('/api/artikler/' + data.insertId.toString());
+        history.push('/artikler/' + data.insertId.toString());
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
@@ -368,11 +394,11 @@ if (root)
         <NavBarHolder />
         <div className="container">
           <Route exact path="/" component={Home} />
-          <Route exact path="/api/artikler" component={ArtikkelList} />
-          <Route exact path="/api/artikler/:id" component={ArticleDetails} />
-          <Route exact path="/api/artikler/:id/edit" component={ArticleEdit} />
-          <Route exact path="/api/artikkel/lagNyhet" component={CreateArticle} />
-          <Route exact path="/api/artikler/kategori/:kategori" component={ArticleByCategory} />
+          <Route exact path="/artikler" component={ArtikkelList} />
+          <Route exact path="/artikler/:id" component={ArticleDetails} />
+          <Route exact path="/artikler/:id/edit" component={ArticleEdit} />
+          <Route exact path="/artikler/lagNyhet" component={CreateArticle} />
+          <Route exact path="/artikler/kategori/:kategori" component={ArticleByCategory} />
         </div>
       </div>
     </HashRouter>,
