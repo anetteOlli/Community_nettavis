@@ -30,7 +30,7 @@ module.exports = class ArtikkelDao extends Dao {
   getAll(callback: (Article[]) => mixed) {
     super.query(
       //for å minimere database trafikk er det satt limit på 20. (er også satt limit på visninga i front-end, så egentlig er det unødvendig)
-      "SELECT Artikler.id, Artikler.tittel, Artikler.innhold, Artikler.bildeLink, Artikler.bildeTekst, Artikler.isViktig, AVG(rating_artikler.rating) AS avgRating, DATE_FORMAT(Artikler.tidspunktOpprettet, '%Y-%m-%d %H:%i') AS opprettet, DATE_FORMAT(Artikler.tidspunktEndret, '%Y-%m-%d %H:%i') AS endret  FROM Artikler LEFT JOIN rating_artikler ON(Artikler.id = rating_artikler.id) WHERE Artikler.isViktig=true GROUP BY Artikler.id ORDER BY avgRating, tidspunktOpprettet DESC LIMIT 20",
+      "SELECT Artikler.id, Artikler.tittel, Artikler.innhold, Artikler.bildeLink, Artikler.bildeTekst, Artikler.isViktig, AVG(rating_artikler.rating) AS avgRating, DATE_FORMAT(Artikler.tidspunktOpprettet, '%Y-%m-%d %H:%i') AS opprettet, DATE_FORMAT(Artikler.tidspunktEndret, '%Y-%m-%d %H:%i') AS endret  FROM Artikler LEFT JOIN rating_artikler ON(Artikler.id = rating_artikler.id) WHERE Artikler.isViktig=true GROUP BY Artikler.id ORDER BY avgRating, tidspunktOpprettet DESC",
       [],
       callback
     );
@@ -78,11 +78,12 @@ module.exports = class ArtikkelDao extends Dao {
       json.kategori,
       json.innhold,
       json.bildeLink,
+      json.bildeTekst,
       json.isViktig,
       json.id
     ];
     super.query(
-      "UPDATE Artikler SET tittel=?, kategori=?, innhold=?, bildeLink=?, isViktig=? WHERE id=?",
+      "UPDATE Artikler SET tittel=?, kategori=?, innhold=?, bildeLink=?, bildeTekst=?, isViktig=? WHERE id=?",
       val,
       callback
     );

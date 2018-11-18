@@ -15,7 +15,9 @@ import {
   CardText,
   DeleteButton,
   EditButton,
-  ConfirmButton
+  ConfirmButton,
+  Pagination,
+  Page
 } from './widgets';
 import { artikkelService } from './services';
 import { FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect } from './articleform';
@@ -41,7 +43,12 @@ type Props = {
   isViktig?: number
 };
 
-class ArtikkelList extends Component {
+export class ArtikkelList extends Component<{ match: { location: { search: string } } }> {
+  max_no_articles_per_page = 20; //constant som forteller hvor mange tillatte artikler det skal være per side
+  page = 0; //siden vi befinner oss på
+  page_no = 0; //antall sider artikkellisten kan hoste frem
+  pagelist: number[] = [];
+  total_no_of_articles = 0; //antall artikler i databasen
   artikler: Article[] = [];
   nyligeArtikler: Article[] = [];
   tidspunkt: Date = new Date();
@@ -49,7 +56,8 @@ class ArtikkelList extends Component {
   render() {
     return (
       <div>
-        {console.log('nylige artikler', this.nyligeArtikler)}
+        {console.log('this.artikler i render: ', this.artikler)}
+
         <Marquee>
           {this.nyligeArtikler.map(artikkel => (
             <a className="nav-link d-inline " key={artikkel.id} href={'#/artikler/' + artikkel.id}>
@@ -69,6 +77,13 @@ class ArtikkelList extends Component {
             <CardFooter>Dato opprettet: {artikkel.opprettet} </CardFooter>
           </Card>
         ))}
+        {this.page_no > 0 &&
+          <Pagination>
+          {this.pagelist.map(page =>(
+              <Page key={page} value={page} onClick={this.changePage}> {(page +1 )} </Page>
+            ))}
+          </Pagination>
+         }
       </div>
     );
   }
@@ -77,26 +92,44 @@ class ArtikkelList extends Component {
     artikkelService
       .getArticles()
       .then(artikler => {
-        if (artikler.length > 20) {
-          this.artikler = artikler.slice(20);
+        //oppretter lista med artikler.
+        this.total_no_of_articles = artikler.length;
+        this.page_no = Math.floor(artikler.length / this.max_no_articles_per_page +1); //gir 0 sider hvis det er færre eller lik 20 artikler
+        this.pagelist = Array.from(Array(this.page_no).keys())
+        //$FlowFixMe
+        const pageTemp = new URLSearchParams(this.props.location.search).get('page');
+        if(pageTemp !=null){
+          this.page = parseInt(pageTemp);
         }
-        this.artikler = artikler;
-        //begrenser antall artikler på hovedsiden:
-        if (this.artikler.length > 20) {
-          this.artikler.slice(20);
+        console.log('page before check: ' + this.page);
+        if (this.page > this.page_no) {
+          this.page = this.page_no;
+        } else if (this.page === null) {
+          this.page = 0;
         }
+        console.log('page after check: ' + this.page + "number of articles in database: " + this.total_no_of_articles);
+
+
+        this.artikler = artikler.slice((this.page  *this.max_no_articles_per_page) ,(this.page  *this.max_no_articles_per_page + this.max_no_articles_per_page));
+
+        //lager lista med viktige artikler. artikkelen skal ikke være mer enn et døgn gammel og det er de tre viktigste artiklene
         const now = new Date();
         const oneDayAgo = now.getDate() - 1;
         const yesterday = new Date();
         yesterday.setDate(oneDayAgo);
         console.log(now);
         //filtrere artikler som skal benyttes til å generere marquees'en:
-        this.nyligeArtikler = this.artikler.filter(function(article, i) {
+        this.nyligeArtikler = artikler.filter(function(article, i) {
           return Date.parse(article.opprettet) > yesterday && i < 3;
         });
         console.log(this.nyligeArtikler[0]);
       })
       .catch((error: Error) => Alert.danger(error.message));
+  }
+  changePage(){
+    //$FlowFixMe
+    history.push('/artikler/?page='+  event.target.value);
+    window.location.reload();
   }
 }
 
@@ -151,7 +184,7 @@ class ArticleDetails extends Component<{ match: { params: { id: number } } }> {
   }
 }
 
-class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
+export class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
   //$FlowFixMe
   artikkel: Article = null;
   isViktig: number = -1;
@@ -184,7 +217,7 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
         >
           <option> endre kategori </option>
           <option value="matlaging"> matlaging </option>
-          <option value="internetOfShit"> internet of shit </option>
+          <option value="internet-of-shit"> internet of shit </option>
           <option value="agurknytt"> agurknytt </option>
         </DefaultSelect>
         <FormGroupText
@@ -200,6 +233,7 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
           description="bildetekst"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             this.artikkel.bildeTekst = event.target.value;
+            console.log('bildeTekst: ' + this.artikkel.bildeTekst + ' ' + event.target.value  );
           }}
           value={this.artikkel.bildeTekst}
         />
@@ -208,7 +242,9 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
             description="fjern fra hovedsiden"
             value="0"
             onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-              this.isViktig = parseInt(event.target.value);
+              console.log('registrerte trykk: ' + event.target.value);
+              this.isViktig === 0 ? (this.isViktig = 1) : (this.isViktig = 0);
+              console.log(this.isViktig, 'skriver ut verdi av this.isViktig');
             }}
           />
         ) : (
@@ -216,7 +252,9 @@ class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
             description="publiser på hovedsiden"
             value="1"
             onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-              this.isViktig = parseInt(event.target.value);
+              console.log('registrerte trykk: ' + event.target.value);
+              this.isViktig === 1 ? (this.isViktig = 0) : (this.isViktig = 1);
+              console.log(this.isViktig, 'skriver ut verdi av this.isViktig');
             }}
           />
         )}
@@ -299,7 +337,7 @@ class NavBarHolder extends Component {
   }
 }
 
-class CreateArticle extends Component {
+export class CreateArticle extends Component {
   article = {
     tittel: '',
     innhold: '',
@@ -316,21 +354,18 @@ class CreateArticle extends Component {
           type="text"
           description="Tittel"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            // $FlowFixMe
             this.article.tittel = event.target.value;
           }}
         />
         <FormGroupTextArea
           description="Innhold"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            // $FlowFixMe
             this.article.innhold = event.target.value;
           }}
         />
         <DefaultSelect
           description="kategori"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            // $FlowFixMe
             this.article.kategori = event.target.value;
           }}
         >
@@ -342,7 +377,6 @@ class CreateArticle extends Component {
           type="url"
           description="bildelenke"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            // $FlowFixMe
             this.article.bildeLink = event.target.value;
           }}
         />
@@ -351,7 +385,6 @@ class CreateArticle extends Component {
           type="text"
           description="bildetekst"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            // $FlowFixMe
             this.article.bildeTekst = event.target.value;
           }}
         />
@@ -360,7 +393,6 @@ class CreateArticle extends Component {
           description="publiser på hovedsiden"
           value="1"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            // $FlowFixMe
             console.log(event.target.value);
             // this.article.isViktig = event.target.value;
             this.article.isViktig === 1 ? (this.article.isViktig = 0) : (this.article.isViktig = 1);
@@ -394,8 +426,8 @@ if (root)
         <NavBarHolder />
         <div className="container">
           <Route exact path="/" component={Home} />
-          <Route exact path="/artikler" component={ArtikkelList} />
-          <Route exact path="/artikler/:id" component={ArticleDetails} />
+          <Route exact path="/artikler/" component={ArtikkelList} />
+          <Route exact path="/artikler/:id/" component={ArticleDetails} />
           <Route exact path="/artikler/:id/edit" component={ArticleEdit} />
           <Route exact path="/artikler/lagNyhet" component={CreateArticle} />
           <Route exact path="/artikler/kategori/:kategori" component={ArticleByCategory} />

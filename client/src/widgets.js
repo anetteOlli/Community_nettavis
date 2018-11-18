@@ -15,7 +15,8 @@ type Props = {
   type?: string,
   href?: string,
   home?: string,
-  key?: number
+  key?: number,
+  page?: number
 };
 
 /**
@@ -241,5 +242,22 @@ export class CardImg extends Component<Props> {
         <figcaption className="figure-caption">{this.props.alt}</figcaption>
       </figure>
     );
+  }
+}
+
+export class Pagination extends Component<Props>{
+  render(){
+    return(
+    <ul className='pagination'>
+    {this.props.children}
+    </ul>
+    );
+  }
+}
+export class Page extends Component<Props>{
+  render(){
+    return(
+      <li className="page-item"><button className='page-link' onClick={this.props.onClick} value={this.props.value}>{this.props.children}</button></li>
+      );
   }
 }

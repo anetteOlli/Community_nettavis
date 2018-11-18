@@ -17,7 +17,7 @@ run_tests:
     - npm install
     - npm test
     - dir
-    - cd .. 
+    - cd ..
     - dir
     - cd client
     - npm install
