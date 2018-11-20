@@ -13,5 +13,7 @@ describe('articleForm tests', () => {
     expect(wrapper.find('form')).toHaveLength(1);
     });
 
-
   })
+
+
+//bug i testrunner?
