@@ -119,7 +119,7 @@ export class ListItem extends Component<Props> {
 export class ConfirmButton extends Component<Props> {
   render() {
     return (
-      <button type="button" className="btn btn-success" onClick={this.props.onClick}>
+      <button type="submit" className="btn btn-success" onClick={this.props.onClick}>
         {this.props.children}
       </button>
     );
@@ -192,18 +192,6 @@ export class FormGroupText extends Component<Props> {
   }
 }
 
-// export class CheckBox extends Component<Props>{
-//
-//   render(){
-//     return (
-//       <div className='form-group form-check'>
-//         <input type="checkbox" className='form-check-input' value='1' onChange={this.props.onChange} />
-//         <label className='form-check-label'> {this.props.description}
-//         </label>
-//       </div>
-//     );
-//   }
-// }
 
 export class FormGroupTextArea extends Component<Props> {
   render() {
@@ -239,26 +227,26 @@ export class CardImg extends Component<Props> {
   render() {
     return (
       <figure className="figure">
-        <img className="class=&quot;card-img-top img-fluid" src={this.props.src} alt={this.props.alt} />
+        <img className='class="card-img-top img-fluid' src={this.props.src} alt={this.props.alt} />
         <figcaption className="figure-caption">{this.props.alt}</figcaption>
       </figure>
     );
   }
 }
 
-export class Pagination extends Component<Props> {
-  render() {
-    return <ul className="pagination">{this.props.children}</ul>;
+export class Pagination extends Component<Props>{
+  render(){
+    return(
+    <ul className='pagination'>
+    {this.props.children}
+    </ul>
+    );
   }
 }
-export class Page extends Component<Props> {
-  render() {
-    return (
-      <li className="page-item">
-        <button className="page-link" onClick={this.props.onClick} value={this.props.value}>
-          {this.props.children}
-        </button>
-      </li>
-    );
+export class Page extends Component<Props>{
+  render(){
+    return(
+      <li className="page-item"><button className='page-link' onClick={this.props.onClick} value={this.props.value}>{this.props.children}</button></li>
+      );
   }
 }

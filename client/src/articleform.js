@@ -28,6 +28,22 @@ export class FormGroupText extends Component<Props> {
     );
   }
 }
+export class FormGroupTextRequired extends Component<Props> {
+  render() {
+    return (
+      <div className="form-group">
+        <label> {this.props.description}</label>
+        <input
+          className="form-control"
+          type={this.props.type}
+          value={this.props.value}
+          required
+          onChange={this.props.onChange}
+        />
+      </div>
+    );
+  }
+}
 
 export class CheckBox extends Component<Props> {
   render() {
@@ -45,7 +61,7 @@ export class FormGroupTextArea extends Component<Props> {
     return (
       <div className="form-group">
         <label> {this.props.description}</label>
-        <textarea className="form-control" onChange={this.props.onChange} value={this.props.value} rows="15" />
+        <textarea className="form-control" onChange={this.props.onChange} required value={this.props.value} rows="15" />
       </div>
     );
   }

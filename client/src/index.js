@@ -20,7 +20,7 @@ import {
   Page
 } from './widgets';
 import { artikkelService } from './services';
-import { FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect } from './articleform';
+import {FormGroupTextRequired, FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect } from './articleform';
 import Marquee from 'react-smooth-marquee';
 import { Article } from './datastructures';
 import { ArticleList } from './articleList';
@@ -81,7 +81,7 @@ export class Livefeed extends Component {
           console.log(this.nyligeArtikler[0]);
           setTimeout(() => {
             this.poll();
-          }, 10000);
+          }, 1000);
         })
         .catch((error: Error) => Alert.danger(error.message));
     }
@@ -98,6 +98,7 @@ export class ArtikkelList extends Component<{ match: { location: { search: strin
   pagelist: number[] = [];
   total_no_of_articles = 0; //antall artikler i databasen
   artikler: Article[] = [];
+
 
   render() {
     return (
@@ -215,8 +216,8 @@ export class ArticleEdit extends Component<{ match: { params: { id: number } } }
     if (!this.artikkel) return null;
 
     return (
-      <form>
-        <FormGroupText
+      <form onSubmit={this.save}>
+        <FormGroupTextRequired
           type="text"
           description="Tittel"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
@@ -281,7 +282,7 @@ export class ArticleEdit extends Component<{ match: { params: { id: number } } }
           />
         )}
         <EditButton onClick={this.cancel}> angre </EditButton>
-        <ConfirmButton onClick={this.save}> Lagre </ConfirmButton>
+        <ConfirmButton> Lagre </ConfirmButton>
       </form>
     );
   }
@@ -405,10 +406,11 @@ export class CreateArticle extends Component {
 
   render() {
     return (
-      <form>
-        <FormGroupText
+      <form onSubmit={this.save}>
+        <FormGroupTextRequired
           type="text"
           description="Tittel"
+          required
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             this.article.tittel = event.target.value;
           }}
@@ -455,7 +457,7 @@ export class CreateArticle extends Component {
             console.log(this.article.isViktig, 'skriver ut verdi av this.article.isViktig');
           }}
         />
-        <SaveButton onClick={this.save} />
+        <SaveButton />
       </form>
     );
   }

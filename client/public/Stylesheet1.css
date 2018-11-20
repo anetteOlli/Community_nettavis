@@ -14,3 +14,8 @@
 .MarqueeContent > * {
   flex: 0 0 auto;
 }
+.flexbox{
+  display: flex;
+  justify-content : space-evenly;
+  width: 100%
+}
