@@ -119,7 +119,7 @@ test("update one article", done => {
     expect(data[0].kategori).toBe("javascript");
     expect(data[0].innhold).toBe("jdakgøjgkaølkfgjø");
     expect(data[0].bildeLink).toBe("veadfadfien");
-    expect(data[0].bildeTekst).toBe('adcd');
+    expect(data[0].bildeTekst).toBe("adcd");
     expect(data[0].isViktig).toBe(0);
     done();
   }

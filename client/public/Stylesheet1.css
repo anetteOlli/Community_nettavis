@@ -1,4 +1,3 @@
-
 .example-appear {
   transform: translateX(0);
 }
@@ -6,4 +5,12 @@
 .example-appear.example-appear-active {
   transform: translateX(100%);
   transition: transform 300ms ease-in;
+}
+.MarqueeContent {
+  display: flex;
+  flex-direction: row;
+}
+
+.MarqueeContent > * {
+  flex: 0 0 auto;
 }

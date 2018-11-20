@@ -16,7 +16,8 @@ type Props = {
   href?: string,
   home?: string,
   key?: number,
-  page?: number
+  page?: number,
+  value?: number
 };
 
 /**
@@ -238,26 +239,26 @@ export class CardImg extends Component<Props> {
   render() {
     return (
       <figure className="figure">
-        <img className='class="card-img-top img-fluid' src={this.props.src} alt={this.props.alt} />
+        <img className="class=&quot;card-img-top img-fluid" src={this.props.src} alt={this.props.alt} />
         <figcaption className="figure-caption">{this.props.alt}</figcaption>
       </figure>
     );
   }
 }
 
-export class Pagination extends Component<Props>{
-  render(){
-    return(
-    <ul className='pagination'>
-    {this.props.children}
-    </ul>
-    );
+export class Pagination extends Component<Props> {
+  render() {
+    return <ul className="pagination">{this.props.children}</ul>;
   }
 }
-export class Page extends Component<Props>{
-  render(){
-    return(
-      <li className="page-item"><button className='page-link' onClick={this.props.onClick} value={this.props.value}>{this.props.children}</button></li>
-      );
+export class Page extends Component<Props> {
+  render() {
+    return (
+      <li className="page-item">
+        <button className="page-link" onClick={this.props.onClick} value={this.props.value}>
+          {this.props.children}
+        </button>
+      </li>
+    );
   }
 }

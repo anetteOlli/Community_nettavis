@@ -21,9 +21,9 @@ import {
 } from './widgets';
 import { artikkelService } from './services';
 import { FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect } from './articleform';
-import { Motion, spring } from 'react-motion';
 import Marquee from 'react-smooth-marquee';
 import { Article } from './datastructures';
+import { ArticleList } from './articleList';
 
 import createHashHistory from 'history/createHashHistory';
 const history = createHashHistory(); // Use history.push(...) to programmatically change path, for instance after successfully saving a student
@@ -43,6 +43,54 @@ type Props = {
   isViktig?: number
 };
 
+export class Livefeed extends Component {
+  nyligeArtikler: Article[] = [];
+  oppdatere: boolean = true;
+
+  render() {
+    return (
+      <Marquee>
+        {this.nyligeArtikler.map(artikkel => (
+          <a className="nav-link d-inline " key={artikkel.id} href={'#/artikler/' + artikkel.id}>
+            {' '}
+            {artikkel.tittel}
+            {' ' + artikkel.opprettet.slice(10)}{' '}
+          </a>
+        ))}{' '}
+      </Marquee>
+    );
+  }
+  mounted() {
+    this.poll();
+  }
+  poll() {
+    if (this.oppdatere) {
+      artikkelService
+        .getArticles()
+        .then(artikler => {
+          //lager lista med viktige artikler. artikkelen skal ikke være mer enn et døgn gammel og det er de tre viktigste artiklene
+          const now = new Date();
+          const oneDayAgo = now.getDate() - 1;
+          const yesterday = new Date();
+          yesterday.setDate(oneDayAgo);
+          console.log(now);
+          //filtrere artikler som skal benyttes til å generere marquees'en:
+          this.nyligeArtikler = artikler.filter(function(article, i) {
+            return Date.parse(article.opprettet) > yesterday && i < 5;
+          });
+          console.log(this.nyligeArtikler[0]);
+          setTimeout(() => {
+            this.poll();
+          }, 10000);
+        })
+        .catch((error: Error) => Alert.danger(error.message));
+    }
+  }
+  componentWillUnmount() {
+    this.oppdatere = false;
+  }
+}
+
 export class ArtikkelList extends Component<{ match: { location: { search: string } } }> {
   max_no_articles_per_page = 20; //constant som forteller hvor mange tillatte artikler det skal være per side
   page = 0; //siden vi befinner oss på
@@ -50,40 +98,23 @@ export class ArtikkelList extends Component<{ match: { location: { search: strin
   pagelist: number[] = [];
   total_no_of_articles = 0; //antall artikler i databasen
   artikler: Article[] = [];
-  nyligeArtikler: Article[] = [];
-  tidspunkt: Date = new Date();
 
   render() {
     return (
-      <div>
+      <div className="container">
         {console.log('this.artikler i render: ', this.artikler)}
 
-        <Marquee>
-          {this.nyligeArtikler.map(artikkel => (
-            <a className="nav-link d-inline " key={artikkel.id} href={'#/artikler/' + artikkel.id}>
-              {' '}
-              {artikkel.tittel}
-              {' ' + artikkel.opprettet.slice(10)}{' '}
-            </a>
-          ))}{' '}
-        </Marquee>
-        {this.artikler.map(artikkel => (
-          <Card key={artikkel.id}>
-            <CardBody title={artikkel.tittel}>
-              {console.log(artikkel)}
-              <CardImg src={artikkel.bildeLink} alt={artikkel.bildeTekst} />
-              <a href={'#/artikler/' + artikkel.id}> les mer </a>
-            </CardBody>
-            <CardFooter>Dato opprettet: {artikkel.opprettet} </CardFooter>
-          </Card>
-        ))}
-        {this.page_no > 0 &&
+        <ArticleList article={this.artikler} />
+        {this.page_no > 0 && (
           <Pagination>
-          {this.pagelist.map(page =>(
-              <Page key={page} value={page} onClick={this.changePage}> {(page +1 )} </Page>
+            {this.pagelist.map(page => (
+              <Page key={page} value={page} onClick={this.changePage}>
+                {' '}
+                {page + 1}{' '}
+              </Page>
             ))}
           </Pagination>
-         }
+        )}
       </div>
     );
   }
@@ -93,12 +124,13 @@ export class ArtikkelList extends Component<{ match: { location: { search: strin
       .getArticles()
       .then(artikler => {
         //oppretter lista med artikler.
-        this.total_no_of_articles = artikler.length;
-        this.page_no = Math.floor(artikler.length / this.max_no_articles_per_page +1); //gir 0 sider hvis det er færre eller lik 20 artikler
-        this.pagelist = Array.from(Array(this.page_no).keys())
+        const importantArticles = artikler.filter(article => article.isViktig === 1);
+        this.total_no_of_articles = importantArticles.length;
+        this.page_no = Math.floor(importantArticles.length / (this.max_no_articles_per_page + 1)); //gir 0 sider hvis det er færre eller lik 20 artikler
+        this.pagelist = Array.from(Array(this.page_no + 1).keys());
         //$FlowFixMe
         const pageTemp = new URLSearchParams(this.props.location.search).get('page');
-        if(pageTemp !=null){
+        if (pageTemp != null) {
           this.page = parseInt(pageTemp);
         }
         console.log('page before check: ' + this.page);
@@ -107,28 +139,18 @@ export class ArtikkelList extends Component<{ match: { location: { search: strin
         } else if (this.page === null) {
           this.page = 0;
         }
-        console.log('page after check: ' + this.page + "number of articles in database: " + this.total_no_of_articles);
+        console.log('page after check: ' + this.page + 'number of articles in database: ' + this.total_no_of_articles);
 
-
-        this.artikler = artikler.slice((this.page  *this.max_no_articles_per_page) ,(this.page  *this.max_no_articles_per_page + this.max_no_articles_per_page));
-
-        //lager lista med viktige artikler. artikkelen skal ikke være mer enn et døgn gammel og det er de tre viktigste artiklene
-        const now = new Date();
-        const oneDayAgo = now.getDate() - 1;
-        const yesterday = new Date();
-        yesterday.setDate(oneDayAgo);
-        console.log(now);
-        //filtrere artikler som skal benyttes til å generere marquees'en:
-        this.nyligeArtikler = artikler.filter(function(article, i) {
-          return Date.parse(article.opprettet) > yesterday && i < 3;
-        });
-        console.log(this.nyligeArtikler[0]);
+        this.artikler = importantArticles.slice(
+          this.page * this.max_no_articles_per_page,
+          this.page * this.max_no_articles_per_page + this.max_no_articles_per_page
+        );
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
-  changePage(){
+  changePage() {
     //$FlowFixMe
-    history.push('/artikler/?page='+  event.target.value);
+    history.push('/artikler/?page=' + event.target.value);
     window.location.reload();
   }
 }
@@ -174,7 +196,7 @@ class ArticleDetails extends Component<{ match: { params: { id: number } } }> {
       .deleteArticle(this.artikkel.id)
       .then(data => {
         console.log('artikkel er slettet', data.insertId);
-        history.push('//artikler/');
+        history.push('/artikler/');
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
@@ -233,7 +255,7 @@ export class ArticleEdit extends Component<{ match: { params: { id: number } } }
           description="bildetekst"
           onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
             this.artikkel.bildeTekst = event.target.value;
-            console.log('bildeTekst: ' + this.artikkel.bildeTekst + ' ' + event.target.value  );
+            console.log('bildeTekst: ' + this.artikkel.bildeTekst + ' ' + event.target.value);
           }}
           value={this.artikkel.bildeTekst}
         />
@@ -291,8 +313,13 @@ export class ArticleEdit extends Component<{ match: { params: { id: number } } }
       .catch((error: Error) => Alert.danger(error.message));
   }
 }
-class ArticleByCategory extends Component<{ match: { params: { kategori: string } } }> {
+class ArticleByCategory extends Component<{ match: { params: { kategori: string }, location: { search: string } } }> {
   artikler: Article[] = [];
+  max_no_articles_per_page = 20; //constant som forteller hvor mange tillatte artikler det skal være per side
+  page = 0; //siden vi befinner oss på
+  page_no = 0; //antall sider artikkellisten kan hoste frem
+  pagelist: number[] = [];
+  total_no_of_articles = 0; //antall artikler i databasen
   render() {
     return (
       <div>
@@ -301,24 +328,53 @@ class ArticleByCategory extends Component<{ match: { params: { kategori: string 
           {//skriver ut kategorien vi er inne på som overskift
           this.props.match.params.kategori.split('-').join(' ')}{' '}
         </h1>
-        {this.artikler.map(artikkel => (
-          <Card key={artikkel.id}>
-            <CardBody title={artikkel.tittel}>
-              {console.log(artikkel)}
-              <CardImg src={artikkel.bildeLink} alt={artikkel.bildeTekst} />
-              <a href={'#/artikler/' + artikkel.id}> les mer </a>
-            </CardBody>
-            <CardFooter>Dato opprettet: {artikkel.opprettet} </CardFooter>
-          </Card>
-        ))}
+        <ArticleList article={this.artikler}> </ArticleList>
+        {console.log('this.page.no' + this.page_no)}
+        {this.page_no > 0 && (
+          <Pagination>
+            {this.pagelist.map(page => (
+              <Page key={page} value={page} onClick={this.changePage}>
+                {' '}
+                {page + 1}{' '}
+              </Page>
+            ))}
+          </Pagination>
+        )}
       </div>
     );
   }
   mounted() {
     artikkelService
       .getArticlesByCategory(this.props.match.params.kategori)
-      .then(artikler => (this.artikler = artikler))
+      .then(artikler => {
+        //oppretter lista med artikler.
+        this.total_no_of_articles = artikler.length;
+        this.page_no = Math.floor(artikler.length / (this.max_no_articles_per_page + 1)); //gir 0 sider hvis det er færre eller lik 20 artikler
+        this.pagelist = Array.from(Array(this.page_no + 1).keys());
+        //$FlowFixMe
+        const pageTemp = new URLSearchParams(this.props.location.search).get('page');
+        if (pageTemp != null) {
+          this.page = parseInt(pageTemp);
+        }
+        console.log('page before check: ' + this.page);
+        if (this.page > this.page_no) {
+          this.page = this.page_no;
+        } else if (this.page === null) {
+          this.page = 0;
+        }
+        console.log('page after check: ' + this.page + 'number of articles in database: ' + this.total_no_of_articles);
+
+        this.artikler = artikler.slice(
+          this.page * this.max_no_articles_per_page,
+          this.page * this.max_no_articles_per_page + this.max_no_articles_per_page
+        );
+      })
       .catch((error: Error) => Alert.danger(error.message));
+  }
+  changePage() {
+    //$FlowFixMe
+    history.push('/artikler/kategori/' + this.props.match.params.kategori + '?page=' + event.target.value);
+    window.location.reload();
   }
 }
 class NavBarHolder extends Component {
@@ -411,7 +467,7 @@ export class CreateArticle extends Component {
       .addArticle(this.article)
       .then(data => {
         console.log('artikkel er lagret', data.insertId);
-        history.push('/artikler/' + data.insertId.toString());
+        history.push('/artikler');
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
@@ -426,6 +482,7 @@ if (root)
         <NavBarHolder />
         <div className="container">
           <Route exact path="/" component={Home} />
+          <Route exact path="/artikler/" component={Livefeed} />
           <Route exact path="/artikler/" component={ArtikkelList} />
           <Route exact path="/artikler/:id/" component={ArticleDetails} />
           <Route exact path="/artikler/:id/edit" component={ArticleEdit} />
