@@ -20,7 +20,7 @@ import {
   Page
 } from './widgets';
 import { artikkelService } from './services';
-import {FormGroupTextRequired, FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect } from './articleform';
+import {FormGroupTextRequired, FormGroupText, CheckBox, FormGroupTextArea, SaveButton, DefaultSelect, ArticleForm } from './articleform';
 import Marquee from 'react-smooth-marquee';
 import { Article } from './datastructures';
 import { ArticleList } from './articleList';
@@ -206,114 +206,50 @@ class ArticleDetails extends Component<{ match: { params: { id: number } } }> {
     history.push('/artikler/' + this.artikkel.id + '/edit');
   }
 }
+class ArticleEdit extends Component<{ match: { params: { id: number } } }>{
+  // $FlowFixMe
+  article: Article = null;
 
-export class ArticleEdit extends Component<{ match: { params: { id: number } } }> {
-  //$FlowFixMe
-  artikkel: Article = null;
-  isViktig: number = -1;
+  render(){
+    if (!this.article) return null;
 
-  render() {
-    if (!this.artikkel) return null;
-
-    return (
-      <form onSubmit={this.save}>
-        <FormGroupTextRequired
-          type="text"
-          description="Tittel"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.artikkel.tittel = event.target.value;
-          }}
-          value={this.artikkel.tittel}
-        />
-        <FormGroupTextArea
-          description="Innhold"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.artikkel.innhold = event.target.value;
-          }}
-          value={this.artikkel.innhold}
-        />
-        <DefaultSelect
-          description="kategori"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.artikkel.kategori = event.target.value;
-          }}
-        >
-          <option> endre kategori </option>
-          <option value="matlaging"> matlaging </option>
-          <option value="internet-of-shit"> internet of shit </option>
-          <option value="agurknytt"> agurknytt </option>
-        </DefaultSelect>
-        <FormGroupText
-          type="url"
-          description="bildelenke"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.artikkel.bildeLink = event.target.value;
-          }}
-          value={this.artikkel.bildeLink}
-        />
-        <FormGroupText
-          type="text"
-          description="bildetekst"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.artikkel.bildeTekst = event.target.value;
-            console.log('bildeTekst: ' + this.artikkel.bildeTekst + ' ' + event.target.value);
-          }}
-          value={this.artikkel.bildeTekst}
-        />
-        {this.artikkel.isViktig === 1 ? (
-          <CheckBox
-            description="fjern fra hovedsiden"
-            value="0"
-            onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-              console.log('registrerte trykk: ' + event.target.value);
-              this.isViktig === 0 ? (this.isViktig = 1) : (this.isViktig = 0);
-              console.log(this.isViktig, 'skriver ut verdi av this.isViktig');
-            }}
-          />
-        ) : (
-          <CheckBox
-            description="publiser på hovedsiden"
-            value="1"
-            onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-              console.log('registrerte trykk: ' + event.target.value);
-              this.isViktig === 1 ? (this.isViktig = 0) : (this.isViktig = 1);
-              console.log(this.isViktig, 'skriver ut verdi av this.isViktig');
-            }}
-          />
-        )}
+    return(
+      <ArticleForm article ={this.article} save={this.save}>
         <EditButton onClick={this.cancel}> angre </EditButton>
-        <ConfirmButton> Lagre </ConfirmButton>
-      </form>
-    );
+      </ArticleForm>
+      );
   }
 
   mounted() {
     artikkelService
       .getArticle(this.props.match.params.id)
-      .then(artikkel => (this.artikkel = artikkel[0]))
+      .then(artikkel => (this.article = artikkel[0]))
       .catch((error: Error) => Alert.danger(error.message));
   }
   cancel() {
     window.location.reload();
   }
 
-  save() {
-    if (!this.artikkel) return null;
-    console.log('hva er artikkelen: ', this.artikkel);
-    if (this.isViktig > -1) this.artikkel.isViktig = this.isViktig;
-    delete this.artikkel.opprettet; //TODO: finn en mer "pure" måte å gjøre dette på
-    delete this.artikkel.endret; //TODO: finn en mer "pure" måte å gjøre dette på
+  save = article => {
+    if (!article) return null;
+    console.log('hva er artikkelen: ', article);
+    // if (article.isViktig > -1) article = this.isViktig;
+    delete article.opprettet; //TODO: finn en mer "pure" måte å gjøre dette på
+    delete article.endret; //TODO: finn en mer "pure" måte å gjøre dette på
 
     artikkelService
-      .updateArticle(this.artikkel)
+      .updateArticle(article)
       .then(() => {
         let artikkelList = ArtikkelList.instance();
         if (artikkelList) artikkelList.mounted(); // Update Studentlist-component
-        if (this.artikkel) history.push('/artikler/' + this.artikkel.id);
+        if (article) history.push('/artikler/' + article.id);
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
+
 }
+
+
 class ArticleByCategory extends Component<{ match: { params: { kategori: string }, location: { search: string } } }> {
   artikler: Article[] = [];
   max_no_articles_per_page = 20; //constant som forteller hvor mange tillatte artikler det skal være per side
@@ -394,7 +330,7 @@ class NavBarHolder extends Component {
   }
 }
 
-export class CreateArticle extends Component {
+class CreateArticle extends Component{
   article = {
     tittel: '',
     innhold: '',
@@ -404,76 +340,29 @@ export class CreateArticle extends Component {
     bildeTekst: ''
   };
 
-  render() {
-    return (
-      <form onSubmit={this.save}>
-        <FormGroupTextRequired
-          type="text"
-          description="Tittel"
-          required
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.article.tittel = event.target.value;
-          }}
-        />
-        <FormGroupTextArea
-          description="Innhold"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.article.innhold = event.target.value;
-          }}
-        />
-        <DefaultSelect
-          description="kategori"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.article.kategori = event.target.value;
-          }}
-        >
-          <option value="matlaging"> matlaging </option>
-          <option value="internet-of-shit"> internet of shit </option>
-          <option value="agurknytt"> agurknytt </option>
-        </DefaultSelect>
-        <FormGroupText
-          type="url"
-          description="bildelenke"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.article.bildeLink = event.target.value;
-          }}
-        />
-
-        <FormGroupText
-          type="text"
-          description="bildetekst"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            this.article.bildeTekst = event.target.value;
-          }}
-        />
-
-        <CheckBox
-          description="publiser på hovedsiden"
-          value="1"
-          onChange={(event: SyntheticInputEvent<HTMLInputElement>) => {
-            console.log(event.target.value);
-            // this.article.isViktig = event.target.value;
-            this.article.isViktig === 1 ? (this.article.isViktig = 0) : (this.article.isViktig = 1);
-            console.log(this.article.isViktig, 'skriver ut verdi av this.article.isViktig');
-          }}
-        />
-        <SaveButton />
-      </form>
-    );
+  render(){
+    return(
+      <ArticleForm article ={
+        // $FlowFixMe
+        this.article} save={this.save}></ArticleForm>
+      );
   }
-  save() {
-    console.log(this.article);
+
+  save = article => {
+    console.log(article);
     // console.log('trying to add article:', this.state);
     artikkelService
       // $FlowFixMe
-      .addArticle(this.article)
+      .addArticle(article)
       .then(data => {
         console.log('artikkel er lagret', data.insertId);
-        history.push('/artikler');
+        history.push('/artikler/'+ data.insertId);
       })
       .catch((error: Error) => Alert.danger(error.message));
   }
 }
+
+
 
 const root = document.getElementById('root');
 if (root)

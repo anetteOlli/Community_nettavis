@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Component } from 'react-simplified';
-import { ArtikkelList, ArticleEdit, CreateArticle } from '../src/index.js';
+import { ArtikkelList} from '../src/index.js';
 import { shallow, mount } from 'enzyme';
 import { artiklerTest } from './testData.js';
 
@@ -19,15 +19,4 @@ describe('ArtikkelList test', () => {
     console.log('number of articles: ', wrapper.debug());
     expect(wrapper.find('Card').length).toBeLessThan(20);
   });
-});
-describe('CreateArticle', () => {
-  const wrapper = shallow(<CreateArticle />);
-  const instance = wrapper.instance();
-  it('should render one form', () => {
-    expect(wrapper.find('form')).toHaveLength(1);
-  });
-  // it('should detect changes in checkbox', ()=>{
-  //   console.log("leser ut props:");
-  //   expect( wrapper.prop(article.isViktig)).to.equal(1);
-  // });
 });

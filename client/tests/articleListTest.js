@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Component } from 'react-simplified';
-import { ArtikkelList, ArticleEdit, CreateArticle } from '../src/index.js';
+import { ArtikkelList } from '../src/index.js';
 import { shallow, mount } from 'enzyme';
 import { artiklerTest } from './testData.js';
 import { ArticleList } from '../src/articleList';
@@ -20,3 +20,5 @@ describe('ArticleList test', () => {
     expect(wrapper.find('Card')).toHaveLength(4);
   });
 });
+
+//her hadde det vært fornuftig å f.eks teste at titlene havner på riktig plass, men det har jeg ikke funnet ut hvordan man gjør.
