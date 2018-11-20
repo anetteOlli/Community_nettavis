@@ -15,10 +15,6 @@ describe('ArtikkelList test', () => {
     //hvis denne testen feiler er det noe seriøst galt som feiler.
     expect(wrapper.find('div')).toHaveLength(1);
   });
-  it('should render one marque', () => {
-    //sjekk av at marqueen ikke ender opp blir rendered flere ganger
-    expect(wrapper.find('Marquee')).toHaveLength(1);
-  });
   it('should render less than 20 Articles', () => {
     console.log('number of articles: ', wrapper.debug());
     expect(wrapper.find('Card').length).toBeLessThan(20);
